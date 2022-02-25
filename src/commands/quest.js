@@ -1,0 +1,86 @@
+const Command = require('../structures/Command')
+const { MessageActionRow, MessageButton } = require('discord.js')
+const { Success, Quest } = require('../../embed')
+const emoji = require('../../emoji')
+const brawlerModel = require('../models/brawler')
+const modeModel = require('../models/gamemode')
+const questModel = require('../models/quest')
+const { GetRandomItemFromArray, GetRandomNumber } = require('../../utils')
+const { questTypes } = require('../../config.json')
+
+const genQuest = async () => {
+  const brawlers = await brawlerModel.find()
+  const modes = await modeModel.find()
+
+  const brawler = GetRandomItemFromArray(brawlers).name
+  const mode = GetRandomItemFromArray(modes).name
+  const type = GetRandomItemFromArray(questTypes)
+  let score_needed
+
+  switch (type) {
+    case 'win':
+      score_needed = GetRandomNumber(4, 8)
+      break
+    case 'defeat':
+      score_needed = GetRandomNumber(6, 16)
+      break
+    case 'deal':
+      score_needed = GetRandomNumber(30000, 160000)
+      break
+  }
+
+  return { brawler, mode, type, score_needed }
+}
+
+const actionRow = new MessageActionRow()
+  .addComponents([
+    new MessageButton()
+      .setStyle('PRIMARY')
+      .setLabel('New Quest')
+      .setCustomId('quest_new')
+  ])
+
+module.exports = class extends Command {
+  constructor(client) {
+    super(client, {
+      name: 'quest',
+      description: 'Shows current quest.',
+      args: [
+        {
+          name: 'user',
+          type: 'USER',
+          description: 'The user to view the quest.'
+        }
+      ]
+    })
+  }
+
+  run = async interaction => {
+    const user = interaction.options.getUser('user') || interaction.user
+    const quest = await questModel.findOne({ user_id: user.id })
+
+    if (quest) { //TODO: Add resign quest button
+      interaction.reply({ embeds: [await Quest(user, quest)] })
+    } else {
+      if (user.id == interaction.user.id) {
+        const reply = await interaction.reply({ embeds: [await Quest(user, null, true)], components: [actionRow], fetchReply: true })
+        const collector = reply.createMessageComponentCollector({ max: 1, time: 30000 })
+
+        collector.on('collect', async int => {
+          if (!int.user.id == interaction.user.id) return int.reply({ content: `${X} **|** ${int.user} This is not your quest!`, ephemeral: true })
+
+          const newQuest = await genQuest()
+          await questModel.create({ user_id: user.id, brawler: newQuest.brawler, mode: newQuest.mode, type: newQuest.type, score_needed: newQuest.score_needed })
+
+          interaction.editReply({ content: `${emoji.Quest} **|** ${interaction.user} you just got a **new** quest**!**`, embeds: [await Quest(user, newQuest)] })
+        })
+
+        collector.on('end', async () => {
+          interaction.editReply({ embeds: [await Quest(user, null)], components: [] })
+        })
+      } else {
+        interaction.reply({ embeds: [await Quest(user, null)] })
+      }
+    }
+  }
+}

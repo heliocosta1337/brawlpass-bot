@@ -1,6 +1,7 @@
 const { model, Schema } = require('mongoose')
 
-module.exports = model('Brawler', new Schema({
+module.exports = model('Season', new Schema({
   name: { type: String, required: true, unique: true },
-  emoji: { type: String }
+  emoji: { type: String },
+  players: { type: [{ id: String, quests: Number }] }
 }, { versionKey: false }))
