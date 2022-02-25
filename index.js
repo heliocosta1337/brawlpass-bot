@@ -11,4 +11,7 @@ const client = new Client({
   ]
 })
 
-client.login(process.env.DISCORD_TOKEN)
+client.connectToDatabase().then(conn => {
+  console.log(`Connected to database "${conn.connection.name}".`)
+  client.login(process.env.DISCORD_TOKEN)
+})

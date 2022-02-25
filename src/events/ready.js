@@ -9,6 +9,6 @@ module.exports = class extends Event {
 
   run = () => {
     this.client.registerCommands()
-    console.log(`Connected as "${this.client.user.tag}" in ${this.client.guilds.cache.size} servers.`)
+    console.log(`Connected to Discord as "${this.client.user.tag}" in ${this.client.guilds.cache.size} servers.`)
   }
 }

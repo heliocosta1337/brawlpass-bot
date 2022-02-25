@@ -1,6 +1,5 @@
 const Command = require('../structures/Command')
 const { MessageEmbed } = require('discord.js')
-const { defaultEmbedColor } = require('../../config.json')
 
 module.exports = class extends Command {
   constructor(client) {
@@ -20,7 +19,6 @@ module.exports = class extends Command {
 
     const embed = new MessageEmbed()
       .setTitle('Pong!')
-      .setColor(defaultEmbedColor)
       .addField('Latency', `${this.client.ws.ping}ms.`, true)
       .addField('Uptime', `**${days}**d **${hours}**h **${minutes}**m **${seconds}**s.`, true)
 

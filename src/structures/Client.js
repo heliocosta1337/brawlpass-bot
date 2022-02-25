@@ -1,6 +1,8 @@
 const { Client } = require('discord.js')
 const { readdirSync } = require('fs')
 const { join } = require('path')
+const { connect } = require('mongoose')
+const { devServer } = require('../../config.json')
 
 module.exports = class extends Client {
   constructor(options) {
@@ -13,9 +15,11 @@ module.exports = class extends Client {
 
   registerCommands() {
     if (process.env.DEV) {
-      this.guilds.cache.get('921109847284539472').commands.set(this.commands)
+      this.guilds.cache.get(devServer).commands.set(this.commands)
+      console.log('Commands set in development server.')
     } else {
       this.application.commands.set(this.commands)
+      console.log('Commands set in all servers.')
     }
   }
 
@@ -28,6 +32,8 @@ module.exports = class extends Client {
 
       this.commands.push(cmd)
     }
+
+    console.log('Loaded commands.')
   }
 
   loadEvents(path = 'src/events') {
@@ -39,5 +45,11 @@ module.exports = class extends Client {
 
       this.on(evt.name, evt.run)
     }
+
+    console.log('Loaded event handlers.')
+  }
+
+  async connectToDatabase() {
+    return await connect(process.env.MONGO_SRV)
   }
 }
