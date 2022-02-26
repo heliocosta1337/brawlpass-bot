@@ -7,6 +7,10 @@ module.exports = {
     return arr[Math.floor(Math.random() * arr.length)]
   },
 
+  GetRandomPercentage: () => {
+    return Math.floor(Math.random() * 100) + 1
+  },
+
   ParseNumber: (n, short) => {
     if ((!n && n != 0) || isNaN(n)) return '-'
 

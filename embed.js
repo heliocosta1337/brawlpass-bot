@@ -20,12 +20,27 @@ module.exports = {
       .setThumbnail('https://cdn.discordapp.com/attachments/831902713343246336/831903461637488690/CloseButton.png')
   },
 
+  Match: () => {
+    return new MessageEmbed()
+      
+  },
+
   Matchmake: (color, mode, players, totalPlayers) => {
     return new MessageEmbed()
       .setColor(color || '#ffe25b')
       .setTitle(mode)
       .setDescription(`Looking for players: \`${players}\` **/** \`${totalPlayers}\``)
       .setThumbnail('https://cdn.discordapp.com/attachments/946615161983238184/946615792793964584/LoadingStar.gif')
+  },
+
+  MatchResult: (win, questCompleted, trophies, gems, kills, damage) => {
+    if (win) {
+      return new MessageEmbed()
+        .setTitle('win')
+    } else {
+      return new MessageEmbed()
+        .setTitle('loss')
+    }
   },
 
   Quest: async (user, quest, self) => {
@@ -60,7 +75,7 @@ module.exports = {
       .setColor(mode.color)
       .setAuthor({ name: `${user.username}'s quest`, iconURL: user.avatarURL() })
       .setDescription(description)
-      .addField('Progress', `\`${quest.score || 0}\` **/** \`${ParseNumber(quest.score_needed)}\``)
+      .addField('Progress', `\`${ParseNumber(quest.score || 0)}\` **/** \`${ParseNumber(quest.score_needed)}\``)
       .setThumbnail(mode.image)
   }
 }

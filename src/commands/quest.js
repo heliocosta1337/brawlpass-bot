@@ -1,6 +1,6 @@
 const Command = require('../structures/Command')
 const { MessageActionRow, MessageButton } = require('discord.js')
-const { Success, Quest } = require('../../embed')
+const embed = require('../../embed')
 const emoji = require('../../emoji')
 const brawlerModel = require('../models/brawler')
 const modeModel = require('../models/gamemode')
@@ -60,10 +60,10 @@ module.exports = class extends Command {
     const quest = await questModel.findOne({ user_id: user.id })
 
     if (quest) { //TODO: Add resign quest button
-      interaction.reply({ embeds: [await Quest(user, quest)] })
+      interaction.reply({ embeds: [await embed.Quest(user, quest)] })
     } else {
       if (user.id == interaction.user.id) {
-        const reply = await interaction.reply({ embeds: [await Quest(user, null, true)], components: [actionRow], fetchReply: true })
+        const reply = await interaction.reply({ embeds: [await embed.Quest(user, null, true)], components: [actionRow], fetchReply: true })
         const collector = reply.createMessageComponentCollector({ max: 1, time: 30000 })
 
         collector.on('collect', async int => {
@@ -72,14 +72,14 @@ module.exports = class extends Command {
           const newQuest = await genQuest()
           await questModel.create({ user_id: user.id, brawler: newQuest.brawler, mode: newQuest.mode, type: newQuest.type, score_needed: newQuest.score_needed })
 
-          interaction.editReply({ content: `${emoji.Quest} **|** ${interaction.user} you just got a **new** quest**!**`, embeds: [await Quest(user, newQuest)] })
+          interaction.editReply({ content: `${emoji.Quest} **|** ${interaction.user} you just got a **new** quest**!**`, embeds: [await embed.Quest(user, newQuest)] })
         })
 
         collector.on('end', async () => {
-          interaction.editReply({ embeds: [await Quest(user, null)], components: [] })
+          interaction.editReply({ embeds: [await embed.Quest(user, null)], components: [] })
         })
       } else {
-        interaction.reply({ embeds: [await Quest(user, null)] })
+        interaction.reply({ embeds: [await embed.Quest(user, null)] })
       }
     }
   }
