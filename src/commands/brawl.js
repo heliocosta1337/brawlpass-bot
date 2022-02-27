@@ -2,7 +2,6 @@ const Command = require('../structures/Command')
 const { MessageActionRow, MessageSelectMenu } = require('discord.js')
 const embed = require('../../embed')
 const emoji = require('../../emoji')
-const profileModel = require('../models/profile')
 const questModel = require('../models/quest')
 const seasonModel = require('../models/season')
 const gamemodeModel = require('../models/gamemode')
@@ -12,14 +11,13 @@ const { currentSeasonName } = require('../../config.json')
 
 const delay = time => new Promise(resolve => setTimeout(resolve, time))
 
-const endBattle = async (userId, brawler, mode) => {
-  const profile = await profileModel.findOne({ user_id: userId })
-  const quest = await questModel.findOne({ user_id: userId })
+const endBattle = async (profile, brawler, mode) => {
+  const quest = await questModel.findOne({ user_id: profile.user_id })
 
   if (GetRandomPercentage() > 25) {
     const trophies = GetRandomNumber(4, 8)
     const gems = GetRandomNumber(2, 12)
-    const kills = GetRandomNumber(1, 6)
+    const kills = GetRandomNumber(1, 4)
     const damage = GetRandomNumber(3700, 31000)
 
     let questCompleted
@@ -44,12 +42,12 @@ const endBattle = async (userId, brawler, mode) => {
         const season = await seasonModel.findOne({ name: currentSeasonName })
 
         if (season) {
-          const seasonPlayer = season.players.find(p => p.user_id == userId)
+          const seasonPlayer = season.players.find(p => p.user_id == profile.user_id)
 
           if (seasonPlayer) {
             await season.updateOne({ $inc: { [`players.${season.players.indexOf(seasonPlayer)}.quests`]: 1 } })
           } else {
-            await season.updateOne({ $push: { players: { user_id: userId, quests: 1 } } })
+            await season.updateOne({ $push: { players: { user_id: profile.user_id, quests: 1 } } })
           }
         }
 
@@ -90,7 +88,7 @@ module.exports = class extends Command {
     }
   }
 
-  run = async interaction => {
+  run = async (interaction, profile) => {
     if (this.client.brawling.includes(interaction.user.id)) return interaction.reply({ content: `${emoji.X} **|** ${interaction.user} Please wait until your last match finishes.`, ephemeral: true })
 
     this.toggleUserBrawling(interaction.user.id, true)
@@ -124,7 +122,7 @@ module.exports = class extends Command {
       interaction.editReply({ embeds: [embed.Match(brawler, selectedMode)] })
 
       await delay(GetRandomNumber(2000, 8000))
-      interaction.editReply({ embeds: [await endBattle(interaction.user.id, brawler, selectedMode)] })
+      interaction.editReply({ embeds: [await endBattle(profile, brawler, selectedMode)] })
 
       this.toggleUserBrawling(interaction.user.id, false)
     })

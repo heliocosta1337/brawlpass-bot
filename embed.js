@@ -41,7 +41,7 @@ module.exports = {
   },
 
   MatchResult: (brawler, mode, result) => {
-    let embed = new MessageEmbed()
+    const embed = new MessageEmbed()
       .addField('Brawler', `${brawler.emoji} ${brawler.name}`, true)
       .addField('Game Mode', `${mode.emoji} ${mode.name}`, true)
 
@@ -105,7 +105,7 @@ module.exports = {
     if (!profile) {
       return new MessageEmbed()
         .setColor(defaultColor)
-        .setTitle('Unknown profile')
+        .setTitle('Unknown player')
         .setDescription('This user has never used the bot.')
     }
 
@@ -148,5 +148,32 @@ module.exports = {
       .addField('Current Season', currentSeasonStats.join('\n'), true)
       .addField('Past Seasons', pastSeasonsStats.filter(Boolean).length > 0 ? pastSeasonsStats.join('\n') : 'No stats')
       .addField('Misc', misc.join('\n'))
+  },
+
+  Wallet: profile => {
+    if (!profile) {
+      return new MessageEmbed()
+        .setColor(defaultColor)
+        .setTitle('Unknown wallet')
+        .setDescription('This user has never used the bot.')
+    }
+
+    return new MessageEmbed()
+      .setColor(defaultColor)
+      .setAuthor({ name: `${profile.user_name}'s wallet`, iconURL: profile.user_avatar })
+      .addField('Gems', `${emoji.Gem} \`${ParseNumber(profile.gems)}\``)
+      .addField('Tickets', `${emoji.Ticket} \`${ParseNumber(profile.tickets)}\``)
+  },
+
+  Shop: buttonsTip => {
+    const embed = new MessageEmbed()
+      .setColor(defaultColor)
+      .setTitle(`${emoji.Shop} Shopping ${emoji.Shop}`)
+      .addField(`${emoji.Ticket} Ticket (1x)`, `${emoji.Gem} \`10\``, true)
+      .addField(`${emoji.Tickets} Ticket (20x)`, `${emoji.Gem} \`180\``, true)
+
+    if (buttonsTip) embed.setDescription('Click the button to buy an item.')
+
+    return embed
   }
 }

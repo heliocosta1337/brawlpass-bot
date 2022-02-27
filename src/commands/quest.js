@@ -15,7 +15,7 @@ const genQuest = async () => {
   const brawler = GetRandomItemFromArray(brawlers).name
   const mode = GetRandomItemFromArray(modes).name
   const type = GetRandomItemFromArray(questTypes)
-  
+
   let score_needed
 
   switch (type) {
@@ -23,7 +23,7 @@ const genQuest = async () => {
       score_needed = GetRandomNumber(4, 8)
       break
     case 'defeat':
-      score_needed = GetRandomNumber(6, 16)
+      score_needed = GetRandomNumber(7, 16)
       break
     case 'deal':
       score_needed = GetRandomNumber(30000, 160000)
@@ -36,9 +36,9 @@ const genQuest = async () => {
 const actionRow = new MessageActionRow()
   .addComponents([
     new MessageButton()
+      .setCustomId('quest_new')
       .setStyle('PRIMARY')
       .setLabel('New Quest')
-      .setCustomId('quest_new')
   ])
 
 module.exports = class extends Command {

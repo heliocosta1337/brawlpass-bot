@@ -8,6 +8,7 @@ module.exports = model('Profile', new Schema({
   user_name: { type: String, required: true },
   user_avatar: { type: String, required: true },
   votes: { type: Number, default: 0 },
+  tickets: { type: Number, default: 2 },
   trophies: { type: Number, default: 0 },
   highestTrophies: { type: Number, default: 0 },
   daily: { type: Date, default: rewardsDate },

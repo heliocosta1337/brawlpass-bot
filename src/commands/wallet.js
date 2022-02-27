@@ -5,13 +5,13 @@ const profileModel = require('../models/profile')
 module.exports = class extends Command {
   constructor(client) {
     super(client, {
-      name: 'profile',
-      description: 'Shows stats.',
+      name: 'wallet',
+      description: 'Shows wallet.',
       args: [
         {
           name: 'user',
           type: 'USER',
-          description: 'The user to view the stats.'
+          description: 'The user to view the wallet.'
         }
       ]
     })
@@ -21,6 +21,6 @@ module.exports = class extends Command {
     const user = interaction.options.getUser('user') || interaction.user
     const profile = await profileModel.findOne({ user_id: user.id })
 
-    interaction.reply({ embeds: [await embed.Profile(profile)], ephemeral: profile == null })
+    interaction.reply({ embeds: [embed.Wallet(profile)], ephemeral: profile == null })
   }
 }
