@@ -71,8 +71,12 @@ module.exports = class extends Command {
 
           const newQuest = await genQuest()
           await questModel.create({ user_id: user.id, brawler: newQuest.brawler, mode: newQuest.mode, type: newQuest.type, score_needed: newQuest.score_needed })
-
-          interaction.editReply({ content: `${emoji.Quest} **|** ${interaction.user} you just got a **new** quest**!**`, embeds: [await embed.Quest(user, newQuest)] })
+            .then(async () => {
+              interaction.editReply({ content: `${emoji.Quest} **|** ${interaction.user} You just got a **new** quest!`, embeds: [await embed.Quest(user, newQuest)], components: [] })
+            })
+            .catch(err => {
+              if (err.code == 11000) int.reply({ content: `${emoji.X} **|** ${int.user} You already have a quest.`, ephemeral: true })
+            })
         })
 
         collector.on('end', async () => {

@@ -11,6 +11,8 @@ module.exports = class extends Client {
     this.commands = []
     this.loadCommands()
     this.loadEvents()
+
+    this.brawling = []
   }
 
   registerCommands() {

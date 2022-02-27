@@ -82,7 +82,19 @@ module.exports = class extends Command {
     })
   }
 
+  toggleUserBrawling = (userId, status) => {
+    if (status) {
+      if (!this.client.brawling.includes(userId)) this.client.brawling.push(userId)
+    } else {
+      if (this.client.brawling.includes(userId)) delete this.client.brawling[this.client.brawling.indexOf(userId)]
+    }
+  }
+
   run = async interaction => {
+    if (this.client.brawling.includes(interaction.user.id)) return interaction.reply({ content: `${emoji.X} **|** ${interaction.user} Please wait until your last match finishes.`, ephemeral: true })
+
+    this.toggleUserBrawling(interaction.user.id, true)
+
     const gamemodes = await gamemodeModel.find()
     const brawler = await brawlerModel.findOne({ name: 'Shelly' }) //TODO
 
@@ -113,10 +125,15 @@ module.exports = class extends Command {
 
       await delay(GetRandomNumber(2000, 8000))
       interaction.editReply({ embeds: [await endBattle(interaction.user.id, brawler, selectedMode)] })
+
+      this.toggleUserBrawling(interaction.user.id, false)
     })
 
     collector.on('end', (collected, reason) => {
-      if (reason == 'time') interaction.editReply({ content: `${emoji.ColtGun} **|** ${interaction.user}'s match was cancelled.`, components: [] })
+      if (reason == 'time') {
+        if (collected.length == 0) interaction.editReply({ content: `${emoji.ColtGun} **|** ${interaction.user}'s match was cancelled.`, components: [] })
+        this.toggleUserBrawling(interaction.user.id, false)
+      }
     })
   }
 }
