@@ -1,9 +1,10 @@
 const { MessageEmbed } = require('discord.js')
+const moment = require('moment')
 const emoji = require('./emoji')
 const brawlerModel = require('./src/models/brawler')
 const modeModel = require('./src/models/gamemode')
 const { ParseNumber, GetRandomSadEmoji } = require('./utils')
-const { positiveColor, negativeColor } = require('./config.json')
+const { defaultColor, positiveColor, negativeColor } = require('./config.json')
 
 module.exports = {
   Success: message => {
@@ -67,7 +68,7 @@ module.exports = {
     if (!quest) {
       return new MessageEmbed()
         .setColor(negativeColor)
-        .setAuthor({ name: `${user.username}'s quest`, iconURL: user.avatarURL() })
+        .setAuthor({ name: `${user.username}'s quest`, iconURL: user.avatarURL() || user.defaultAvatarURL })
         .setDescription(!self ? 'No quest.' : 'No quest.\nClick the button to get a new one!')
     }
 
@@ -93,9 +94,43 @@ module.exports = {
 
     return new MessageEmbed()
       .setColor(mode.color)
-      .setAuthor({ name: `${user.username}'s quest`, iconURL: user.avatarURL() })
+      .setAuthor({ name: `${user.username}'s quest`, iconURL: user.avatarURL() || user.defaultAvatarURL })
       .setDescription(description)
       .addField('Progress', `\`${ParseNumber(quest.score || 0)}\` **/** \`${ParseNumber(quest.score_needed)}\``)
       .setThumbnail(mode.image)
+  },
+
+  Profile: async profile => {
+    const allTimeStats = [
+      `${emoji.TrophyHighest} **${ParseNumber(profile.highestTrophies, true)}** Highest trophies`,
+      `${emoji.Matches} **${ParseNumber(profile.matches, true)}** Matches played`,
+      `${emoji.HeroStar} **${ParseNumber(profile.wins, true)}** Wins`,
+      `${emoji.ColtGun} **${ParseNumber(profile.kills, true)}** Kills`,
+      `${emoji.Aim} **${ParseNumber(profile.damage, true)}** Damage done`,
+      `${emoji.CheckMark} **${ParseNumber(0, true)}** Quests completed`
+    ]
+
+    const currentSeason = [
+      `//TODO`
+    ]
+
+    const pastSeasons = [
+      `//TODO`
+    ]
+
+    const misc = [
+      `${emoji.Brawlcord} Player since: **${moment(profile.createdAt).fromNow()}**`,
+      `👀 Last seen: **${moment(profile.updatedAt).fromNow()}**`,
+      `${emoji.Upvote} Votes: **${ParseNumber(profile.votes)}**`
+    ]
+
+    return new MessageEmbed()
+      .setColor(defaultColor)
+      .setAuthor({ name: `${profile.user_name}'s profile`, iconURL: profile.user_avatar })
+      .setThumbnail('https://cdn.discordapp.com/attachments/831902713343246336/831903566590509128/Profile.png')
+      .addField('All Time Stats', allTimeStats.join('\n'), true)
+      .addField('Current Season', currentSeason.join('\n'), true)
+      .addField('Past Seasons', pastSeasons.join('\n'))
+      .addField('Misc', misc.join('\n'))
   }
 }

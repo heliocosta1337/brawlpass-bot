@@ -2,6 +2,7 @@
   "devServer": "921109847284539472",
   "questTypes": ["win", "defeat", "deal"],
   "currentSeason": "Year of The Tiger",
+  "defaultColor": "#fedb17",
   "positiveColor": "#2cdc18",
   "negativeColor": "#f01818"
 }
