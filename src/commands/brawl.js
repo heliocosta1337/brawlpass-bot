@@ -12,7 +12,7 @@ const { currentSeason } = require('../../config.json')
 
 const delay = time => new Promise(resolve => setTimeout(resolve, time))
 
-const endBattle = async (userId, mode) => {
+const endBattle = async (userId, brawler, mode) => {
   const profile = await profileModel.findOne({ user_id: userId })
   const quest = await questModel.findOne({ user_id: userId })
 
@@ -25,27 +25,22 @@ const endBattle = async (userId, mode) => {
     let questCompleted
     const newTrophiesTotal = profile.trophies + trophies
 
-    await profile.updateOne({
-      $inc: { trophies, gems, matches: 1, wins: 1, kills, damage },
-      $set: { highestTrophies: newTrophiesTotal > profile.highestTrophies ? newTrophiesTotal : profile.highestTrophies }
-    })
-
-    if (quest && quest.mode == mode) {
-      let newScoreTotal = quest.score
+    if (quest?.mode == mode.name) {
+      let scoreToAdd
 
       switch (quest.type) {
         case 'win':
-          newScoreTotal += 1
+          scoreToAdd = 1
           break
         case 'defeat':
-          newScoreTotal += kills
+          scoreToAdd = kills
           break
         case 'deal':
-          newScoreTotal += damage
+          scoreToAdd = damage
           break
       }
 
-      if (newScoreTotal >= quest.score_needed) {
+      if (quest.score + scoreToAdd >= quest.score_needed) {
         const season = await seasonModel.findOne({ name: currentSeason })
 
         if (season) {
@@ -61,16 +56,21 @@ const endBattle = async (userId, mode) => {
         await quest.deleteOne()
         questCompleted = true
       } else {
-        await quest.updateOne({ $inc: { score: newScoreTotal } })
+        await quest.updateOne({ $inc: { score: scoreToAdd } })
       }
     }
 
-    return embed.MatchResult(true, questCompleted, trophies, gems, kills, damage)
+    await profile.updateOne({
+      $inc: { trophies, gems: questCompleted ? gems : 0, matches: 1, wins: 1, kills, damage },
+      $set: { highestTrophies: newTrophiesTotal > profile.highestTrophies ? newTrophiesTotal : profile.highestTrophies }
+    })
+
+    return embed.MatchResult(brawler, mode, { win: true, questCompleted, trophies, gems, kills, damage })
   } else {
     const trophies = GetRandomNumber(3, 5)
 
     await profile.updateOne({ $inc: { trophies: profile.trophies > 0 ? -trophies : 0, matches: 1 } })
-    return embed.MatchResult(false, false, trophies)
+    return embed.MatchResult(brawler, mode, { trophies })
   }
 }
 
@@ -95,24 +95,24 @@ module.exports = class extends Command {
       ])
 
     const reply = await interaction.reply({ content: `${emoji.ColtGun} **|** ${interaction.user}'s match`, components: [actionRow], fetchReply: true })
-    const collector = reply.createMessageComponentCollector({ max: 1, time: 30000 })
+    const collector = reply.createMessageComponentCollector({ time: 30000 })
 
     collector.on('collect', async int => {
-      if (!int.user.id == interaction.user.id) return int.reply({ content: `${emoji.X} **|** ${int.user} This is not your match! Please use \`/brawl\` command.`, ephemeral: true })
+      if (int.user.id != interaction.user.id) return int.reply({ content: `${emoji.X} **|** ${int.user} This is not your match! Please use \`/brawl\` command.`, ephemeral: true })
 
       const selectedMode = gamemodes.find(g => g.name == int.values[0])
 
       for (let i = 0; i < selectedMode.players; i++) {
-        const matchmakeEmbed = embed.Matchmake(selectedMode.color, `${selectedMode.emoji} ${selectedMode.name}`, i + 1, selectedMode.players)
+        const matchmakeEmbed = embed.Matchmake(selectedMode, i + 1)
 
         interaction.editReply({ embeds: [matchmakeEmbed], components: [] })
         await delay(Math.floor(Math.random() * 1000) + 100)
       }
 
-      interaction.editReply({ embeds: [] }) //TODO
+      interaction.editReply({ embeds: [embed.Match(brawler, selectedMode)] })
 
       await delay(GetRandomNumber(2000, 8000))
-      interaction.editReply({ embeds: [await endBattle(interaction.user.id, selectedMode.name)] })
+      interaction.editReply({ embeds: [await endBattle(interaction.user.id, brawler, selectedMode)] })
     })
 
     collector.on('end', (collected, reason) => {

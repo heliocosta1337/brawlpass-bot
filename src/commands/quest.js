@@ -64,10 +64,10 @@ module.exports = class extends Command {
     } else {
       if (user.id == interaction.user.id) {
         const reply = await interaction.reply({ embeds: [await embed.Quest(user, null, true)], components: [actionRow], fetchReply: true })
-        const collector = reply.createMessageComponentCollector({ max: 1, time: 30000 })
+        const collector = reply.createMessageComponentCollector({ time: 60000 })
 
         collector.on('collect', async int => {
-          if (!int.user.id == interaction.user.id) return int.reply({ content: `${X} **|** ${int.user} This is not your quest!`, ephemeral: true })
+          if (int.user.id != interaction.user.id) return int.reply({ content: `${emoji.X} **|** ${int.user} This is not your quest! Please use \`/quest\` command.`, ephemeral: true })
 
           const newQuest = await genQuest()
           await questModel.create({ user_id: user.id, brawler: newQuest.brawler, mode: newQuest.mode, type: newQuest.type, score_needed: newQuest.score_needed })
