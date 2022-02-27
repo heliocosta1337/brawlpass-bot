@@ -8,7 +8,7 @@ const seasonModel = require('../models/season')
 const gamemodeModel = require('../models/gamemode')
 const brawlerModel = require('../models/brawler')
 const { GetRandomNumber, GetRandomPercentage } = require('../../utils')
-const { currentSeason } = require('../../config.json')
+const { currentSeasonName } = require('../../config.json')
 
 const delay = time => new Promise(resolve => setTimeout(resolve, time))
 
@@ -41,7 +41,7 @@ const endBattle = async (userId, brawler, mode) => {
       }
 
       if (quest.score + scoreToAdd >= quest.score_needed) {
-        const season = await seasonModel.findOne({ name: currentSeason })
+        const season = await seasonModel.findOne({ name: currentSeasonName })
 
         if (season) {
           const seasonPlayer = season.players.find(p => p.user_id == userId)
@@ -96,7 +96,7 @@ module.exports = class extends Command {
     this.toggleUserBrawling(interaction.user.id, true)
 
     const gamemodes = await gamemodeModel.find()
-    const brawler = await brawlerModel.findOne({ name: 'Shelly' }) //TODO
+    const brawler = await brawlerModel.findOne({ name: 'Shelly' }) //TODO: Check if has quest's brawler otherwise use random brawler
 
     const actionRow = new MessageActionRow()
       .addComponents([

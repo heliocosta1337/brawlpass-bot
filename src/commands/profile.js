@@ -21,10 +21,6 @@ module.exports = class extends Command {
     const user = interaction.options.getUser('user') || interaction.user
     const profile = await profileModel.findOne({ user_id: user.id })
 
-    if (profile) {
-      interaction.reply({ embeds: [embed.Profile(profile)] })
-    } else {
-      interaction.reply('no profile in db')
-    }
+    interaction.reply({ embeds: [await embed.Profile(profile)], ephemeral: profile == null })
   }
 }

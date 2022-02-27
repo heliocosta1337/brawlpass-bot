@@ -15,6 +15,7 @@ const genQuest = async () => {
   const brawler = GetRandomItemFromArray(brawlers).name
   const mode = GetRandomItemFromArray(modes).name
   const type = GetRandomItemFromArray(questTypes)
+  
   let score_needed
 
   switch (type) {
@@ -59,7 +60,7 @@ module.exports = class extends Command {
     const user = interaction.options.getUser('user') || interaction.user
     const quest = await questModel.findOne({ user_id: user.id })
 
-    if (quest) { //TODO: Add resign quest button
+    if (quest) { //TODO: Add resign button
       interaction.reply({ embeds: [await embed.Quest(user, quest)] })
     } else {
       if (user.id == interaction.user.id) {

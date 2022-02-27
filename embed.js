@@ -1,10 +1,11 @@
 const { MessageEmbed } = require('discord.js')
 const moment = require('moment')
 const emoji = require('./emoji')
-const brawlerModel = require('./src/models/brawler')
+const seasonModel = require('./src/models/season')
 const modeModel = require('./src/models/gamemode')
+const brawlerModel = require('./src/models/brawler')
 const { ParseNumber, GetRandomSadEmoji } = require('./utils')
-const { defaultColor, positiveColor, negativeColor } = require('./config.json')
+const { currentSeasonName, defaultColor, positiveColor, negativeColor } = require('./config.json')
 
 module.exports = {
   Success: message => {
@@ -57,7 +58,7 @@ module.exports = {
     } else {
       embed
         .setColor(negativeColor)
-        .setTitle(`Oh No... ${GetRandomSadEmoji()}`)
+        .setTitle(`Oh No ${GetRandomSadEmoji()}`)
         .addField('You Lost', `${emoji.Trophy} \`-${result.trophies}\``)
 
       return embed
@@ -69,7 +70,7 @@ module.exports = {
       return new MessageEmbed()
         .setColor(negativeColor)
         .setAuthor({ name: `${user.username}'s quest`, iconURL: user.avatarURL() || user.defaultAvatarURL })
-        .setDescription(!self ? 'No quest.' : 'No quest.\nClick the button to get a new one!')
+        .setDescription(!self ? 'No quest.' : 'No quest.\n\nClick the button to get a new one!')
     }
 
     const brawler = await brawlerModel.findOne({ name: quest.brawler })
@@ -101,6 +102,18 @@ module.exports = {
   },
 
   Profile: async profile => {
+    if (!profile) {
+      return new MessageEmbed()
+        .setColor(defaultColor)
+        .setTitle('Unknown profile')
+        .setDescription('This user has never used the bot.')
+    }
+
+    const seasons = await seasonModel.find()
+
+    const currentSeason = seasons.find(s => s.name == currentSeasonName)
+    const pastSeasons = seasons.filter(s => s.name != currentSeasonName)
+
     const allTimeStats = [
       `${emoji.TrophyHighest} **${ParseNumber(profile.highestTrophies, true)}** Highest trophies`,
       `${emoji.Matches} **${ParseNumber(profile.matches, true)}** Matches played`,
@@ -110,18 +123,21 @@ module.exports = {
       `${emoji.CheckMark} **${ParseNumber(0, true)}** Quests completed`
     ]
 
-    const currentSeason = [
-      `//TODO`
+    const currentSeasonStats = [
+      `${currentSeason.emoji} ${currentSeason.name}`,
+      `${emoji.Trophy} **${ParseNumber(profile.trophies, true)}** Trophies`,
+      `${emoji.CheckMark} **${ParseNumber(currentSeason.players.find(p => p.user_id == profile.user_id)?.quests || 0)}** Quests completed`
     ]
 
-    const pastSeasons = [
-      `//TODO`
-    ]
+    const pastSeasonsStats = pastSeasons.map(s => {
+      const seasonPlayer = s.players.find(p => p.user_id == profile.user_id)
+      if (seasonPlayer) return `${s.emoji} ${s.name} (${emoji.CheckMark} **${ParseNumber(seasonPlayer.quests)}**)`
+    })
 
     const misc = [
+      `${emoji.Upvote} Votes: **${ParseNumber(profile.votes)}**`,
       `${emoji.Brawlcord} Player since: **${moment(profile.createdAt).fromNow()}**`,
-      `👀 Last seen: **${moment(profile.updatedAt).fromNow()}**`,
-      `${emoji.Upvote} Votes: **${ParseNumber(profile.votes)}**`
+      `👀 Last seen: **${moment(profile.updatedAt).fromNow()}**`
     ]
 
     return new MessageEmbed()
@@ -129,8 +145,8 @@ module.exports = {
       .setAuthor({ name: `${profile.user_name}'s profile`, iconURL: profile.user_avatar })
       .setThumbnail('https://cdn.discordapp.com/attachments/831902713343246336/831903566590509128/Profile.png')
       .addField('All Time Stats', allTimeStats.join('\n'), true)
-      .addField('Current Season', currentSeason.join('\n'), true)
-      .addField('Past Seasons', pastSeasons.join('\n'))
+      .addField('Current Season', currentSeasonStats.join('\n'), true)
+      .addField('Past Seasons', pastSeasonsStats.filter(Boolean).length > 0 ? pastSeasonsStats.join('\n') : 'No stats')
       .addField('Misc', misc.join('\n'))
   }
 }
