@@ -13,6 +13,8 @@ module.exports = class extends Client {
     this.loadEvents()
 
     this.brawling = []
+    this.brawlCooldown = {}
+    this.questCooldown = {}
   }
 
   registerCommands() {

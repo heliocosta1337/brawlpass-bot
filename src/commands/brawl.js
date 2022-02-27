@@ -1,5 +1,6 @@
 const Command = require('../structures/Command')
 const { MessageActionRow, MessageSelectMenu } = require('discord.js')
+const moment = require('moment')
 const embed = require('../../embed')
 const emoji = require('../../emoji')
 const questModel = require('../models/quest')
@@ -7,7 +8,7 @@ const seasonModel = require('../models/season')
 const gamemodeModel = require('../models/gamemode')
 const brawlerModel = require('../models/brawler')
 const { GetRandomNumber, GetRandomPercentage } = require('../../utils')
-const { currentSeasonName } = require('../../config.json')
+const { currentSeasonName, brawlCooldown } = require('../../config.json')
 
 const delay = time => new Promise(resolve => setTimeout(resolve, time))
 
@@ -81,15 +82,36 @@ module.exports = class extends Command {
   }
 
   toggleUserBrawling = (userId, status) => {
-    if (status) {
-      if (!this.client.brawling.includes(userId)) this.client.brawling.push(userId)
-    } else {
-      if (this.client.brawling.includes(userId)) delete this.client.brawling[this.client.brawling.indexOf(userId)]
-    }
+    status ? this.client.brawling.push(userId) : delete this.client.brawling[this.client.brawling.indexOf(userId)]
+  }
+
+  setUserCooldown = userId => {
+    this.client.brawlCooldown[userId] = moment().toISOString()
+
+    setTimeout(() => {
+      this.client.brawlCooldown[userId] = null
+    }, brawlCooldown)
   }
 
   run = async (interaction, profile) => {
     if (this.client.brawling.includes(interaction.user.id)) return interaction.reply({ content: `${emoji.X} **|** ${interaction.user} Please wait until your last match finishes.`, ephemeral: true })
+
+    const cooldown = this.client.brawlCooldown[interaction.user.id]
+    if (cooldown) {
+      if (profile.tickets > 0) {
+        await profile.updateOne({ $inc: { tickets: -1 } })
+      } else {
+        return interaction.reply({
+          embeds: [
+            embed.Error(`
+            Please wait **${(moment(cooldown).add(brawlCooldown).diff(moment()) / 1000).toFixed(0)}** seconds before brawling again.\n\n`
+              + `You can buy ${emoji.Tickets} tickets in \`/shop\` to skip this cooldown.`
+            )
+          ],
+          ephemeral: true
+        })
+      }
+    }
 
     this.toggleUserBrawling(interaction.user.id, true)
 
@@ -124,12 +146,13 @@ module.exports = class extends Command {
       await delay(GetRandomNumber(2000, 8000))
       interaction.editReply({ embeds: [await endBattle(profile, brawler, selectedMode)] })
 
+      this.setUserCooldown(interaction.user.id)
       this.toggleUserBrawling(interaction.user.id, false)
     })
 
     collector.on('end', (collected, reason) => {
       if (reason == 'time') {
-        if (collected.length == 0) interaction.editReply({ content: `${emoji.ColtGun} **|** ${interaction.user}'s match was cancelled.`, components: [] })
+        if (collected.size == 0) interaction.editReply({ content: `${emoji.ColtGun} **|** ${interaction.user}'s match was cancelled.`, components: [] })
         this.toggleUserBrawling(interaction.user.id, false)
       }
     })

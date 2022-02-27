@@ -4,5 +4,7 @@
   "currentSeasonName": "Year of The Tiger",
   "defaultColor": "#fedb17",
   "positiveColor": "#2cdc18",
-  "negativeColor": "#f01818"
+  "negativeColor": "#f01818",
+  "brawlCooldown": 30000,
+  "questCooldown": 300000
 }

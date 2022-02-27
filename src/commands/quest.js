@@ -1,12 +1,13 @@
 const Command = require('../structures/Command')
 const { MessageActionRow, MessageButton } = require('discord.js')
+const moment = require('moment')
 const embed = require('../../embed')
 const emoji = require('../../emoji')
 const brawlerModel = require('../models/brawler')
 const modeModel = require('../models/gamemode')
 const questModel = require('../models/quest')
 const { GetRandomItemFromArray, GetRandomNumber } = require('../../utils')
-const { questTypes } = require('../../config.json')
+const { questTypes, questCooldown } = require('../../config.json')
 
 const genQuest = async () => {
   const brawlers = await brawlerModel.find()
@@ -56,7 +57,15 @@ module.exports = class extends Command {
     })
   }
 
-  run = async interaction => {
+  setUserCooldown = userId => {
+    this.client.questCooldown[userId] = moment() //TODO
+
+    setTimeout(() => {
+      this.client.questCooldown[userId] = null
+    }, questCooldown)
+  }
+
+  run = async (interaction, profile) => {
     const user = interaction.options.getUser('user') || interaction.user
     const quest = await questModel.findOne({ user_id: user.id })
 
@@ -70,9 +79,27 @@ module.exports = class extends Command {
         collector.on('collect', async int => {
           if (int.user.id != interaction.user.id) return int.reply({ content: `${emoji.X} **|** ${int.user} This is not your quest! Please use \`/quest\` command.`, ephemeral: true })
 
+          const cooldown = this.client.questCooldown[interaction.user.id]
+          if (cooldown) {
+            if (profile.tickets > 0) {
+              await profile.updateOne({ $inc: { tickets: -1 } })
+            } else {
+              return int.reply({
+                embeds: [
+                  embed.Error(`
+                  Please wait **${(moment(cooldown).add(questCooldown).diff(moment()) / 1000).toFixed(0)}** seconds before getting a new quest.\n\n`
+                    + `You can buy ${emoji.Tickets} tickets in \`/shop\` to skip this cooldown.`
+                  )
+                ],
+                ephemeral: true
+              })
+            }
+          }
+
           const newQuest = await genQuest()
           await questModel.create({ user_id: user.id, brawler: newQuest.brawler, mode: newQuest.mode, type: newQuest.type, score_needed: newQuest.score_needed })
             .then(async () => {
+              this.setUserCooldown(interaction.user.id)
               interaction.editReply({ content: `${emoji.Quest} **|** ${interaction.user} You just got a **new** quest!`, embeds: [await embed.Quest(user, newQuest)], components: [] })
             })
             .catch(err => {
