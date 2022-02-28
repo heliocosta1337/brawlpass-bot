@@ -1,6 +1,7 @@
 require('dotenv').config()
 
 const Client = require('./src/structures/Client')
+const Webhook = require('./src/structures/Webhook')
 
 const client = new Client({
   intents: [
@@ -13,5 +14,9 @@ const client = new Client({
 
 client.connectToDatabase().then(conn => {
   console.log(`Connected to database "${conn.connection.name}".`)
-  client.login(process.env.DISCORD_TOKEN)
+
+  new Webhook().listen().then(port => {
+    console.log(`Webhook listening at :${port}.`)
+    client.login(process.env.DISCORD_TOKEN)
+  })
 })

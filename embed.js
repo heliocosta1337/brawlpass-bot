@@ -54,6 +54,14 @@ module.exports = {
       .setDescription(`👉 Click [here](${botInvite}) to **invite** Brawl Pass Bot to your discord server.`)
   },
 
+  Vote: () => {
+    return new MessageEmbed()
+      .setColor(defaultColor)
+      .setDescription(`Voting helps bump us higher on bot lists, and in return you get ${emoji.Gem} gems as reward.`)
+      .setFooter({ text: 'Rewards are automatically given after voting' })
+      .addField(`${emoji.Gem} 75 gems every 12h`, '**Click [👉 here 👈](https://top.gg/bot/709524167917043742/vote) to proceed!**')
+  },
+
   Matchmake: (mode, players) => {
     return new MessageEmbed()
       .setColor(mode.color || defaultColor)
