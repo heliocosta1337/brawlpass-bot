@@ -2,7 +2,7 @@
   "webhookPort": 30000,
   "devServerId": "921109847284539472",
   "botId": "709524167917043742",
-  "botInvite": "https://discord.com/api/oauth2/authorize?client_id=711020496380231960&permissions=0&scope=applications.commands%20bot",
+  "botInvite": "https://discord.com/api/oauth2/authorize?client_id=709524167917043742&permissions=0&scope=applications.commands%20bot",
   "communityServerInvite": "https://discord.gg/tweenky",
   "questTypes": ["win", "defeat", "deal"],
   "currentSeasonName": "Year of The Tiger",

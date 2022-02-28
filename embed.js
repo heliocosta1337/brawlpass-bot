@@ -58,6 +58,7 @@ module.exports = {
     return new MessageEmbed()
       .setColor(defaultColor)
       .setDescription(`Voting helps bump us higher on bot lists, and in return you get ${emoji.Gem} gems as reward.`)
+      .setThumbnail('https://cdn.discordapp.com/attachments/831902713343246336/831903487931318292/GreenHeart.png')
       .setFooter({ text: 'Rewards are automatically given after voting' })
       .addField(`${emoji.Gem} 75 gems every 12h`, '**Click [👉 here 👈](https://top.gg/bot/709524167917043742/vote) to proceed!**')
   },
@@ -287,7 +288,9 @@ module.exports = {
     })
 
     return new MessageEmbed()
+      .setColor(season.color)
       .setTitle(`${season.emoji} ${season.name} (${season.name == currentSeasonName ? 'Current' : 'Past'})`)
       .setDescription(rankings)
+      .setThumbnail(season.image)
   }
 }

@@ -26,7 +26,7 @@ app.post('/vote', async (req, res) => {
 })
 
 module.exports = class {
-  async listen() {
+  init() {
     return new Promise(resolve => {
       app.listen(port, () => {
         resolve(port)
