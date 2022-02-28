@@ -21,6 +21,6 @@ module.exports = class extends Event {
 
   run = () => {
     this.client.registerCommands()
-    this.updateStats()
+    if (!process.env.DEV) this.updateStats()
   }
 }

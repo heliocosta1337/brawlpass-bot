@@ -1,4 +1,5 @@
 const { Client } = require('discord.js')
+const Database = require('./Database')
 const { readdirSync } = require('fs')
 const { join } = require('path')
 const { devServerId } = require('../../config.json')
@@ -17,12 +18,14 @@ module.exports = class extends Client {
   }
 
   registerCommands() {
-    if (process.env.DEV) {
-      const devServer = this.guilds.cache.get(devServerId)
-      if (devServer) devServer.commands.set(this.commands)
-    } else {
-      this.application.commands.set(this.commands)
-    }
+    new Database().init().then(() => {
+      if (process.env.DEV) {
+        const devServer = this.guilds.cache.get(devServerId)
+        if (devServer) devServer.commands.set(this.commands)
+      } else {
+        this.application.commands.set(this.commands)
+      }
+    })
   }
 
   loadCommands(path = 'src/commands') {
