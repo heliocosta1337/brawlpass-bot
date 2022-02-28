@@ -6,7 +6,7 @@ const profileModel = require('../models/profile')
 
 const buyTicket = (profile, price, amount) => {
   return new Promise(async resolve => {
-    if (profile.gems < price) resolve(`${emoji.X} **|** Not enough balance.`)
+    if (profile.gems < price) return resolve(`${emoji.X} **|** Not enough balance.`)
 
     await profile.updateOne({ $inc: { gems: -price, tickets: amount } })
       .then(() => { resolve(`${emoji.Shop} **|** Your purchase was successful.`) })
@@ -34,12 +34,12 @@ module.exports = class extends Command {
     })
   }
 
-  run = async (interaction, profile) => {
+  run = async interaction => {
     const reply = await interaction.reply({ embeds: [embed.Shop(true)], components: [actionRow], fetchReply: true })
     const collector = reply.createMessageComponentCollector({ time: 120000 })
 
     collector.on('collect', async int => {
-      if (int.user.id != profile.user_id) profile = await profileModel.findOne({ user_id: int.user.id })
+      const profile = await profileModel.findOne({ user_id: int.user.id })
 
       switch (int.customId) {
         case 'buy_ticket_1':

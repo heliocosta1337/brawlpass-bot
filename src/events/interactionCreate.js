@@ -1,5 +1,6 @@
 const Event = require('../structures/Event')
 const profileModel = require('../models/profile')
+const { ParseDiscordName } = require('../../utils')
 
 module.exports = class extends Event {
   constructor(client) {
@@ -12,12 +13,12 @@ module.exports = class extends Event {
     if (interaction.user.bot) return
 
     const avatar = interaction.user.avatarURL() || interaction.user.defaultAvatarURL
+    const name = ParseDiscordName(interaction.user.tag)
+
     let profile = await profileModel.findOne({ user_id: interaction.user.id })
+    if (!profile) profile = await profileModel.create({ user_id: interaction.user.id, user_name: name, user_avatar: avatar })
 
-    if (!profile) profile = await profileModel.create({ user_id: interaction.user.id, user_name: interaction.user.tag, user_avatar: avatar })
-
-    if (profile.user_name != interaction.user.tag) await profile.updateOne({ $set: { user_name: interaction.user.tag } })
-    if (profile.user_avatar != avatar) await profile.updateOne({ $set: { user_avatar: avatar } })
+    await profile.updateOne({ $set: { user_name: name, user_avatar: avatar } })
 
     if (interaction.isCommand()) {
       const cmd = this.client.commands.find(c => c.name == interaction.commandName)

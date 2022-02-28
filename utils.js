@@ -11,6 +11,10 @@ module.exports = {
     return Math.floor(Math.random() * 100) + 1
   },
 
+  GetRandomSadEmoji: () => {
+    return module.exports.GetRandomItemFromArray(['😞', '😔', '😟', '😕', '🙁', '☹️', '😣', '😖', '😫', '😩', '😢', '😭', '😰', '😥', '😓', '😪'])
+  },
+
   ParseNumber: (n, short) => {
     if ((!n && n != 0) || isNaN(n)) return '-'
 
@@ -24,7 +28,25 @@ module.exports = {
     return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
   },
 
-  GetRandomSadEmoji: () => {
-    return module.exports.GetRandomItemFromArray(['😞', '😔', '😟', '😕', '🙁', '☹️', '😣', '😖', '😫', '😩', '😢', '😭', '😰', '😥', '😓', '😪'])
+  ParseDiscordName: name => {
+    name = name.replace(/\*/g, '')
+    name = name.replace(/_/g, '')
+    name = name.replace(/`/g, '')
+
+    return name
+  },
+
+  HumanizeMilliseconds: ms => {
+    hours = Math.floor(ms % 86400000 / 3600000)
+    minutes = Math.floor(ms % 3600000 / 60000)
+    sec = Math.floor(ms % 60000 / 1000)
+
+    let str = ''
+
+    if (hours) str += `**${hours}** hours`
+    if (minutes) str += `, **${minutes}** minutes`
+    if (sec) str += ` and **${sec}** seconds`
+
+    return str
   }
 }

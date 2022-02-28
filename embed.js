@@ -1,11 +1,12 @@
 const { MessageEmbed } = require('discord.js')
 const moment = require('moment')
 const emoji = require('./emoji')
+const profileModel = require('./src/models/profile')
 const seasonModel = require('./src/models/season')
 const modeModel = require('./src/models/gamemode')
 const brawlerModel = require('./src/models/brawler')
 const { ParseNumber, GetRandomSadEmoji } = require('./utils')
-const { currentSeasonName, defaultColor, positiveColor, negativeColor } = require('./config.json')
+const { communityServerInvite, botInvite, currentSeasonName, defaultColor, positiveColor, negativeColor } = require('./config.json')
 
 module.exports = {
   Success: message => {
@@ -24,9 +25,38 @@ module.exports = {
       .setThumbnail('https://cdn.discordapp.com/attachments/831902713343246336/831903461637488690/CloseButton.png')
   },
 
+  Info: () => {
+    const tutorial = [
+      `First you pick a quest **(**\`/quest\`**)** then you play matches **(**\`/brawl\`**)** until you complete your quest & rewards in return.`,
+      `The above commands have a certain cooldown, you can buy ${emoji.Tickets} tickets **(**\`/shop\`**)** to bypass them.`,
+      `You can view your balance & items using **(**\`/wallet\`**)** command.`
+    ]
+
+    return new MessageEmbed()
+      .setColor(defaultColor)
+      .setTitle('About Brawl Pass Bot')
+      .setThumbnail('https://cdn.discordapp.com/attachments/831902713343246336/831903444365213726/BrawlPassTicket.png')
+      .setFooter({ text: 'This content is not affiliated with Supercell.' })
+      .addField(`${emoji.Info} What is this?`, 'This is a discord bot designed to entertain people. The bot is a Brawl Pass simulator based on the Supercell game Brawl Stars, where you complete quests and get rewards in return.')
+      .addField(`${emoji.Info} How to play?`, tutorial.join('\n\n'))
+      .addField(`${emoji.Info} Need help?`, `Join our ${emoji.Brawlcord} server: ${communityServerInvite}`)
+  },
+
+  Discord: () => {
+    return new MessageEmbed()
+      .setColor(defaultColor)
+      .setDescription(`👉 Click [here](${communityServerInvite}) to **join** our discord server.`)
+  },
+
+  Invite: () => {
+    return new MessageEmbed()
+      .setColor(defaultColor)
+      .setDescription(`👉 Click [here](${botInvite}) to **invite** Brawl Pass Bot to your discord server.`)
+  },
+
   Matchmake: (mode, players) => {
     return new MessageEmbed()
-      .setColor(mode.color || '#ffe25b')
+      .setColor(mode.color || defaultColor)
       .setTitle(`${mode.emoji} ${mode.name}`)
       .setDescription(`Looking for players: \`${players}\` **/** \`${mode.players}\``)
       .setThumbnail('https://cdn.discordapp.com/attachments/946615161983238184/946615792793964584/LoadingStar.gif')
@@ -132,7 +162,7 @@ module.exports = {
     const pastSeasonsStats = pastSeasons.map(s => {
       const seasonPlayer = s.players.find(p => p.user_id == profile.user_id)
       if (seasonPlayer) return `${s.emoji} ${s.name} (${emoji.CheckMark} **${ParseNumber(seasonPlayer.quests)}**)`
-    })
+    }).filter(Boolean)
 
     const misc = [
       `${emoji.Upvote} Votes: **${ParseNumber(profile.votes)}**`,
@@ -146,7 +176,7 @@ module.exports = {
       .setThumbnail('https://cdn.discordapp.com/attachments/831902713343246336/831903566590509128/Profile.png')
       .addField('All Time Stats', allTimeStats.join('\n'), true)
       .addField('Current Season', currentSeasonStats.join('\n'), true)
-      .addField('Past Seasons', pastSeasonsStats.filter(Boolean).length > 0 ? pastSeasonsStats.join('\n') : 'No stats')
+      .addField('Past Seasons', pastSeasonsStats.length > 0 ? pastSeasonsStats.join('\n') : 'No stats')
       .addField('Misc', misc.join('\n'))
   },
 
@@ -175,5 +205,81 @@ module.exports = {
     if (buttonsTip) embed.setDescription('Click the button to buy an item.')
 
     return embed
+  },
+
+  Leaderboard: async type => {
+    const profiles = await profileModel.find().limit(10).sort([[type, -1]])
+    const embed = new MessageEmbed().setColor('#3fabfa').setThumbnail('https://cdn.discordapp.com/attachments/831902713343246336/831903533837451374/Leaderboard.png')
+
+    let title
+    let titleEmoji
+
+    let rankings = ''
+
+    profiles.forEach(p => {
+      let rank = profiles.indexOf(p) + 1
+      let score
+
+      switch (type) {
+        case 'highestTrophies':
+          title = 'Highest Trophies'
+          titleEmoji = emoji.TrophyHighest
+          score = ParseNumber(p.highestTrophies)
+          break
+        case 'matches':
+          title = 'Matches Played'
+          titleEmoji = emoji.Matches
+          score = ParseNumber(p.matches)
+          break
+        case 'wins':
+          title = 'Matches Won'
+          titleEmoji = emoji.HeroStar
+          score = ParseNumber(p.wins)
+          break
+        case 'kills':
+          title = 'Kills'
+          titleEmoji = emoji.ColtGun
+          score = ParseNumber(p.kills)
+          break
+        case 'damage':
+          title = 'Damage Done'
+          titleEmoji = emoji.Aim
+          score = ParseNumber(p.damage)
+          break
+        case 'gems':
+          title = 'Richest'
+          titleEmoji = emoji.Gem
+          score = ParseNumber(p.gems)
+          break
+      }
+
+      if (rank == 1) rankings += `🥇 ${p.user_name} **|** ${titleEmoji} **${score}**\n`
+      if (rank == 2) rankings += `🥈 ${p.user_name} **|** ${titleEmoji} **${score}**\n`
+      if (rank == 3) rankings += `🥉 ${p.user_name} **|** ${titleEmoji} **${score}**\n`
+      if (rank > 3) rankings += `\n**${rank}.** ${p.user_name} **|** ${titleEmoji} **${score}**`
+    })
+
+    embed.setTitle(`${titleEmoji} ${title}`)
+    embed.setDescription(rankings)
+
+    return embed
+  },
+
+  Season: season => {
+    let topPlayers = season.players.sort((a, b) => b.quests - a.quests).slice(0, 10)
+    let rankings = ''
+
+    topPlayers.forEach(p => {
+      let rank = topPlayers.indexOf(p) + 1
+
+      if (rank == 1) rankings += `🥇 ${p.user_name} **|** ${emoji.CheckMark} **${ParseNumber(p.quests)}**\n`
+      if (rank == 2) rankings += `🥈 ${p.user_name} **|** ${emoji.CheckMark} **${ParseNumber(p.quests)}**\n`
+      if (rank == 3) rankings += `🥉 ${p.user_name} **|** ${emoji.CheckMark} **${ParseNumber(p.quests)}**\n`
+      if (rank > 3) rankings += `\n**${rank}.** ${p.user_name} **|** ${emoji.CheckMark} **${ParseNumber(p.quests)}**`
+    })
+
+    return new MessageEmbed()
+      .setTitle(`${season.emoji} ${season.name} (${season.name == currentSeasonName ? 'Current' : 'Past'})`)
+      .setDescription(rankings)
   }
 }

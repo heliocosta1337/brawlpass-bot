@@ -2,7 +2,7 @@ const { Client } = require('discord.js')
 const { readdirSync } = require('fs')
 const { join } = require('path')
 const { connect } = require('mongoose')
-const { devServer } = require('../../config.json')
+const { devServerId } = require('../../config.json')
 
 module.exports = class extends Client {
   constructor(options) {
@@ -19,8 +19,14 @@ module.exports = class extends Client {
 
   registerCommands() {
     if (process.env.DEV) {
-      this.guilds.cache.get(devServer).commands.set(this.commands)
-      console.log('Commands set in development server.')
+      const devServer = this.guilds.cache.get(devServerId)
+
+      if (devServer) {
+        devServer.commands.set(this.commands)
+        console.log('Commands set in development server.')
+      } else {
+        console.log('Commands not set. Dev server not found in cache.')
+      }
     } else {
       this.application.commands.set(this.commands)
       console.log('Commands set in all servers.')

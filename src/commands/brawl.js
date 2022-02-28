@@ -48,7 +48,7 @@ const endBattle = async (profile, brawler, mode) => {
           if (seasonPlayer) {
             await season.updateOne({ $inc: { [`players.${season.players.indexOf(seasonPlayer)}.quests`]: 1 } })
           } else {
-            await season.updateOne({ $push: { players: { user_id: profile.user_id, quests: 1 } } })
+            await season.updateOne({ $push: { players: { user_id: profile.user_id, user_name: profile.user_name, quests: 1 } } })
           }
         }
 

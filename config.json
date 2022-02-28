@@ -1,10 +1,14 @@
 {
-  "devServer": "921109847284539472",
+  "devServerId": "921109847284539472",
+  "communityServerInvite": "https://discord.gg/tweenky",
+  "botInvite": "https://discord.com/api/oauth2/authorize?client_id=711020496380231960&permissions=0&scope=applications.commands%20bot",
   "questTypes": ["win", "defeat", "deal"],
   "currentSeasonName": "Year of The Tiger",
   "defaultColor": "#fedb17",
   "positiveColor": "#2cdc18",
   "negativeColor": "#f01818",
   "brawlCooldown": 30000,
-  "questCooldown": 300000
+  "questCooldown": 300000,
+  "dailyReward": 20,
+  "weeklyReward": 150
 }
