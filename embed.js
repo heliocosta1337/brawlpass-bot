@@ -288,7 +288,7 @@ module.exports = {
     })
 
     return new MessageEmbed()
-      .setColor(season.color)
+      .setColor(season.color || defaultColor)
       .setTitle(`${season.emoji} ${season.name} (${season.name == currentSeasonName ? 'Current' : 'Past'})`)
       .setDescription(rankings)
       .setThumbnail(season.image)
