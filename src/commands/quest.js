@@ -108,7 +108,7 @@ module.exports = class extends Command {
         })
 
         collector.on('end', async () => {
-          interaction.editReply({ embeds: [await embed.Quest(user, null)], components: [] })
+          interaction.editReply({ components: [] })
         })
       } else {
         interaction.reply({ embeds: [await embed.Quest(user, null)] })
