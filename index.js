@@ -3,10 +3,10 @@ const Webhook = require('./src/structures/Webhook')
 
 require('dotenv').config()
 
-new Webhook().init().then(port => {
-  console.log(`Webhook listening at :${port}.`)
+const manager = new ShardingManager('./bot.js', { token: process.env.DISCORD_TOKEN })
 
-  const manager = new ShardingManager('./bot.js', { token: process.env.DISCORD_TOKEN })
+new Webhook().init(manager).then(port => {
+  console.log(`Webhook listening at :${port}.`)
 
   manager.on('shardCreate', shard => console.log(`Shard #${shard.id} launched.`))
   manager.spawn()

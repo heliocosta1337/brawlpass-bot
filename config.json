@@ -1,6 +1,8 @@
 {
   "webhookPort": 30000,
   "devServerId": "921109847284539472",
+  "communityServerId": "526127502842789899",
+  "communityServerVotesChannelId": "948221409191157831",
   "botId": "709524167917043742",
   "botInvite": "https://discord.com/api/oauth2/authorize?client_id=709524167917043742&permissions=0&scope=applications.commands%20bot",
   "communityServerInvite": "https://discord.gg/tweenky",
