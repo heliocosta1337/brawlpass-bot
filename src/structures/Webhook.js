@@ -1,4 +1,5 @@
 const express = require('express')
+const Database = require('../structures/Database')
 const profileModel = require('../models/profile')
 const { webhookPort, botId, voteReward } = require('../../config.json')
 
@@ -25,11 +26,17 @@ app.post('/vote', async (req, res) => {
   }
 })
 
+app.get('*', (req, res) => {
+  res.status(204).end()
+})
+
 module.exports = class {
   init() {
     return new Promise(resolve => {
-      app.listen(port, () => {
-        resolve(port)
+      new Database().init().then(() => {
+        app.listen(port, () => {
+          resolve(port)
+        })
       })
     })
   }
