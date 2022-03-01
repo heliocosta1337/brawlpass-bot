@@ -116,7 +116,7 @@ module.exports = {
     const mode = await modeModel.findOne({ name: quest.mode })
 
     const scoreNeeded = ParseNumber(quest.score_needed, true)
-    const scorePercentage = quest.score * 100 / quest.score_needed
+    const scorePercentage = (quest.score || 0) * 100 / quest.score_needed
     let description
 
     switch (quest.type) {
