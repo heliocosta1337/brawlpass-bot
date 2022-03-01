@@ -5,7 +5,7 @@ const profileModel = require('./src/models/profile')
 const seasonModel = require('./src/models/season')
 const modeModel = require('./src/models/gamemode')
 const brawlerModel = require('./src/models/brawler')
-const { ParseNumber, GetRandomSadEmoji } = require('./utils')
+const { ParseNumber, GetRandomSadEmoji, GetProgressBarImage } = require('./utils')
 const { communityServerInvite, botInvite, currentSeasonName, defaultColor, positiveColor, negativeColor } = require('./config.json')
 
 module.exports = {
@@ -116,6 +116,7 @@ module.exports = {
     const mode = await modeModel.findOne({ name: quest.mode })
 
     const scoreNeeded = ParseNumber(quest.score_needed, true)
+    const scorePercentage = quest.score * 100 / quest.score_needed
     let description
 
     switch (quest.type) {
@@ -136,8 +137,9 @@ module.exports = {
       .setColor(mode.color)
       .setAuthor({ name: `${user.username}'s quest`, iconURL: user.avatarURL() || user.defaultAvatarURL })
       .setDescription(description)
-      .addField('Progress', `\`${ParseNumber(quest.score || 0)}\` **/** \`${ParseNumber(quest.score_needed)}\``)
       .setThumbnail(mode.image)
+      .addField('Progress', `\`${ParseNumber(quest.score || 0)}\` **/** \`${ParseNumber(quest.score_needed)}\` ( **${scorePercentage.toFixed(0)} %** )`)
+      .setImage(GetProgressBarImage(scorePercentage))
   },
 
   Profile: async profile => {
