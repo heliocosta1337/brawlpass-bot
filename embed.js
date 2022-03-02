@@ -2,9 +2,9 @@ const { MessageEmbed } = require('discord.js')
 const moment = require('moment')
 const emoji = require('./emoji')
 const profileModel = require('./src/models/profile')
-const seasonModel = require('./src/models/season')
 const modeModel = require('./src/models/gamemode')
 const brawlerModel = require('./src/models/brawler')
+const seasonModel = require('./src/models/season')
 const { ParseNumber, GetRandomSadEmoji, GetProgressBarImage } = require('./utils')
 const { communityServerInvite, botInvite, currentSeasonName, defaultColor, positiveColor, negativeColor } = require('./config.json')
 
@@ -104,12 +104,12 @@ module.exports = {
     }
   },
 
-  Quest: async (user, quest, self) => {
+  Quest: async (user, quest) => {
     if (!quest) {
       return new MessageEmbed()
         .setColor(negativeColor)
         .setAuthor({ name: `${user.username}'s quest`, iconURL: user.avatarURL() || user.defaultAvatarURL })
-        .setDescription(!self ? 'No quest.' : 'No quest.\n\nClick the button to get a new one!')
+        .setDescription('No quest.')
     }
 
     const brawler = await brawlerModel.findOne({ name: quest.brawler })

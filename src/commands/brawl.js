@@ -4,9 +4,9 @@ const moment = require('moment')
 const embed = require('../../embed')
 const emoji = require('../../emoji')
 const questModel = require('../models/quest')
-const seasonModel = require('../models/season')
-const gamemodeModel = require('../models/gamemode')
+const modeModel = require('../models/gamemode')
 const brawlerModel = require('../models/brawler')
+const seasonModel = require('../models/season')
 const { GetRandomNumber, GetRandomPercentage, GetRandomItemFromArray } = require('../../utils')
 const { currentSeasonName, brawlCooldown } = require('../../config.json')
 
@@ -95,9 +95,9 @@ module.exports = class extends Command {
   }
 
   run = async (interaction, profile) => {
-    if (this.client.brawling.includes(interaction.user.id)) return interaction.reply({ content: `${emoji.X} **|** ${interaction.user} Please wait until your last match finishes.`, ephemeral: true })
+    if (this.client.brawling.includes(profile.user_id)) return interaction.reply({ content: `${emoji.X} **|** ${interaction.user} Please wait until your last match finishes.`, ephemeral: true })
 
-    const cooldown = this.client.brawlCooldown[interaction.user.id]
+    const cooldown = this.client.brawlCooldown[profile.user_id]
     if (cooldown) {
       if (profile.tickets > 0) {
         await profile.updateOne({ $inc: { tickets: -1 } })
@@ -114,9 +114,9 @@ module.exports = class extends Command {
       }
     }
 
-    this.toggleUserBrawling(interaction.user.id, true)
+    this.toggleUserBrawling(profile.user_id, true)
 
-    const gamemodes = await gamemodeModel.find()
+    const gamemodes = await modeModel.find()
     const brawlers = await brawlerModel.find()
 
     const quest = await questModel.findOne({ user_id: profile.user_id })
@@ -134,7 +134,7 @@ module.exports = class extends Command {
     const collector = reply.createMessageComponentCollector({ time: 30000 })
 
     collector.on('collect', async int => {
-      if (int.user.id != interaction.user.id) return int.reply({ content: `${emoji.X} **|** ${int.user} This is not your match! Please use \`/brawl\` command.`, ephemeral: true })
+      if (int.user.id != profile.user_id) return int.reply({ content: `${emoji.X} **|** ${int.user} This is not your match! Please use \`/brawl\` command.`, ephemeral: true })
 
       const selectedMode = gamemodes.find(g => g.name == int.values[0])
 
@@ -150,14 +150,14 @@ module.exports = class extends Command {
       await delay(GetRandomNumber(2000, 8000))
       interaction.editReply({ embeds: [await endBattle(profile, brawler, selectedMode)] })
 
-      this.setUserCooldown(interaction.user.id)
-      this.toggleUserBrawling(interaction.user.id, false)
+      this.setUserCooldown(profile.user_id)
+      this.toggleUserBrawling(profile.user_id, false)
     })
 
     collector.on('end', (collected, reason) => {
       if (reason == 'time') {
         if (collected.size == 0) interaction.editReply({ content: `${emoji.ColtGun} **|** ${interaction.user}'s match was cancelled.`, components: [] })
-        this.toggleUserBrawling(interaction.user.id, false)
+        this.toggleUserBrawling(profile.user_id, false)
       }
     })
   }

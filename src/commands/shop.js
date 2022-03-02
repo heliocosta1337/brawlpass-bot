@@ -10,7 +10,7 @@ const buyTicket = (profile, price, amount) => {
 
     await profile.updateOne({ $inc: { gems: -price, tickets: amount } })
       .then(() => { resolve(`${emoji.Shop} **|** Your purchase was successful.`) })
-      .catch(() => { resolve(`${emoji.X} **|** Your purchase failed.`) })
+      .catch(() => { resolve(`${emoji.X} **|** Your purchase failed, please try again or contact the support if this error persists.`) })
   })
 }
 
@@ -51,7 +51,7 @@ module.exports = class extends Command {
       }
     })
 
-    collector.on('end', async () => {
+    collector.on('end', () => {
       interaction.editReply({ embeds: [embed.Shop(false)], components: [] })
     })
   }

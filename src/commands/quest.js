@@ -3,6 +3,7 @@ const { MessageActionRow, MessageButton } = require('discord.js')
 const moment = require('moment')
 const embed = require('../../embed')
 const emoji = require('../../emoji')
+const profileModel = require('../models/profile')
 const brawlerModel = require('../models/brawler')
 const modeModel = require('../models/gamemode')
 const questModel = require('../models/quest')
@@ -34,14 +35,6 @@ const genQuest = async () => {
   return { brawler, mode, type, score_needed }
 }
 
-const actionRow = new MessageActionRow()
-  .addComponents([
-    new MessageButton()
-      .setCustomId('quest_new')
-      .setStyle('PRIMARY')
-      .setLabel('New Quest')
-  ])
-
 module.exports = class extends Command {
   constructor(client) {
     super(client, {
@@ -58,7 +51,7 @@ module.exports = class extends Command {
   }
 
   setUserCooldown = userId => {
-    this.client.questCooldown[userId] = moment() //TODO
+    this.client.questCooldown[userId] = moment()
 
     setTimeout(() => {
       this.client.questCooldown[userId] = null
@@ -69,50 +62,64 @@ module.exports = class extends Command {
     const user = interaction.options.getUser('user') || interaction.user
     const quest = await questModel.findOne({ user_id: user.id })
 
-    if (quest) { //TODO: Add resign button
-      interaction.reply({ embeds: [await embed.Quest(user, quest)] })
-    } else {
-      if (user.id == interaction.user.id) {
-        const reply = await interaction.reply({ embeds: [await embed.Quest(user, null, true)], components: [actionRow], fetchReply: true })
-        const collector = reply.createMessageComponentCollector({ time: 60000 })
+    const actionRow = new MessageActionRow()
+      .addComponents([
+        new MessageButton()
+          .setCustomId(quest ? 'quest_del' : 'quest_new')
+          .setStyle(quest ? 'DANGER' : 'PRIMARY')
+          .setLabel(quest ? 'Resign' : 'New')
+      ])
 
-        collector.on('collect', async int => {
-          if (int.user.id != interaction.user.id) return int.reply({ content: `${emoji.X} **|** ${int.user} This is not your quest! Please use \`/quest\` command.`, ephemeral: true })
+    const reply = await interaction.reply({ embeds: [await embed.Quest(user, quest)], components: user.id == profile.user_id ? [actionRow] : null, fetchReply: true })
+    const collector = reply.createMessageComponentCollector({ time: 180000 })
 
-          const cooldown = this.client.questCooldown[interaction.user.id]
-          if (cooldown) {
-            if (profile.tickets > 0) {
-              await profile.updateOne({ $inc: { tickets: -1 } })
-            } else {
-              return int.reply({
-                embeds: [
-                  embed.Error(`
-                  Please wait **${(moment(cooldown).add(questCooldown).diff(moment()) / 1000).toFixed(0)}** seconds before getting a new quest.\n\n`
-                    + `You can buy ${emoji.Tickets} tickets in \`/shop\` to skip this cooldown.`
-                  )
-                ],
-                ephemeral: true
-              })
-            }
+    collector.on('collect', async int => {
+      if (int.user.id != profile.user_id) return int.reply({ content: `${emoji.X} **|** ${int.user} This is not your quest! Please use \`/quest\` command.`, ephemeral: true })
+
+      if (int.customId == 'quest_new') {
+        const cooldown = this.client.questCooldown[profile.user_id]
+        if (cooldown) {
+          profile = await profileModel.findOne({ user_id: profile.user_id })
+          if (profile.tickets > 0) {
+            await profile.updateOne({ $inc: { tickets: -1 } })
+          } else {
+            return int.reply({
+              embeds: [
+                embed.Error(`
+                Please wait **${(moment(cooldown).add(questCooldown).diff(moment()) / 1000).toFixed(0)}** seconds before getting a new quest.\n\n`
+                  + `You can buy ${emoji.Tickets} tickets in \`/shop\` to skip this cooldown.`
+                )
+              ],
+              ephemeral: true
+            })
           }
+        }
 
-          const newQuest = await genQuest()
-          await questModel.create({ user_id: user.id, brawler: newQuest.brawler, mode: newQuest.mode, type: newQuest.type, score_needed: newQuest.score_needed })
-            .then(async () => {
-              this.setUserCooldown(interaction.user.id)
-              interaction.editReply({ content: `${emoji.Quest} **|** ${interaction.user} You just got a **new** quest!`, embeds: [await embed.Quest(user, newQuest)], components: [] })
-            })
-            .catch(err => {
-              if (err.code == 11000) int.reply({ content: `${emoji.X} **|** ${int.user} You already have a quest.`, ephemeral: true })
-            })
-        })
-
-        collector.on('end', async () => {
-          interaction.editReply({ components: [] })
-        })
-      } else {
-        interaction.reply({ embeds: [await embed.Quest(user, null)] })
+        const newQuest = await genQuest()
+        questModel.create({ user_id: user.id, brawler: newQuest.brawler, mode: newQuest.mode, type: newQuest.type, score_needed: newQuest.score_needed })
+          .then(async () => {
+            this.setUserCooldown(profile.user_id)
+            interaction.editReply({ content: `${emoji.Quest} **|** ${interaction.user} You just got a **new** quest!`, embeds: [await embed.Quest(user, newQuest)], components: [] })
+          })
+          .catch(err => {
+            if (err.code == 11000) int.reply({ content: `${emoji.X} **|** ${int.user} You already have a quest.`, ephemeral: true })
+          })
       }
-    }
+
+      if (int.customId == 'quest_del') {
+        quest.deleteOne()
+          .then(async () => {
+            await interaction.editReply({ embeds: [await embed.Quest(user, null)], components: [] })
+            int.reply({ content: `${emoji.Quest} **|** ${int.user} Your quest has been resigned.`, ephemeral: true })
+          })
+          .catch(() => {
+            int.reply({ content: `${emoji.X} **|** ${int.user} Failed to resign your quest, please try again or contact the support if this error persists.`, ephemeral: true })
+          })
+      }
+    })
+
+    collector.on('end', () => {
+      interaction.editReply({ components: [] })
+    })
   }
 }

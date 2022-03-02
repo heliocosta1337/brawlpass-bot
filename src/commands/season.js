@@ -33,7 +33,7 @@ module.exports = class extends Command {
       interaction.editReply({ embeds: [embed.Season(seasons.find(s => s.name == int.values[0]))] })
     })
 
-    collector.on('end', async () => {
+    collector.on('end', () => {
       interaction.editReply({ components: [] })
     })
   }
