@@ -21,7 +21,7 @@ app.post('/vote', async (req, res) => {
 
       if (shardingManager) {
         await shardingManager.broadcastEval((c, { serverId, channelId, profile, upVote }) => {
-          c.guilds.cache.get(serverId)?.channels.cache.get(channelId)?.send(`${upVote} **${profile.user_name}** has just voted! Total votes: **${profile.votes + 1}** 🎉`)
+          c.guilds.cache.get(serverId)?.channels.cache.get(channelId)?.send(`${upVote} **${profile.user_name}** has just voted! Total votes: **${profile.votes + 1}**. 🎉`)
         }, { context: { serverId: communityServerId, channelId: communityServerVotesChannelId, profile: profile, upVote: emoji.Upvote } })
       }
 

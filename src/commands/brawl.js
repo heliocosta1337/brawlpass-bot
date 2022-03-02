@@ -7,7 +7,7 @@ const questModel = require('../models/quest')
 const seasonModel = require('../models/season')
 const gamemodeModel = require('../models/gamemode')
 const brawlerModel = require('../models/brawler')
-const { GetRandomNumber, GetRandomPercentage } = require('../../utils')
+const { GetRandomNumber, GetRandomPercentage, GetRandomItemFromArray } = require('../../utils')
 const { currentSeasonName, brawlCooldown } = require('../../config.json')
 
 const delay = time => new Promise(resolve => setTimeout(resolve, time))
@@ -117,7 +117,10 @@ module.exports = class extends Command {
     this.toggleUserBrawling(interaction.user.id, true)
 
     const gamemodes = await gamemodeModel.find()
-    const brawler = await brawlerModel.findOne({ name: 'Shelly' }) //TODO: Check if has quest's brawler otherwise use random brawler
+    const brawlers = await brawlerModel.find()
+
+    const quest = await questModel.findOne({ user_id: profile.user_id })
+    const brawler = quest ? await brawlerModel.findOne({ name: quest.brawler }) : GetRandomItemFromArray(brawlers)
 
     const actionRow = new MessageActionRow()
       .addComponents([

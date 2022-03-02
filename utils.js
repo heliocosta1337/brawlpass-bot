@@ -3,12 +3,12 @@ module.exports = {
     return Math.floor(Math.random() * (max - min) + min)
   },
 
-  GetRandomItemFromArray: arr => {
-    return arr[Math.floor(Math.random() * arr.length)]
-  },
-
   GetRandomPercentage: () => {
     return Math.floor(Math.random() * 100) + 1
+  },
+
+  GetRandomItemFromArray: arr => {
+    return arr[Math.floor(Math.random() * arr.length)]
   },
 
   GetRandomSadEmoji: () => {
