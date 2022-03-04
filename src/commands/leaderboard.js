@@ -14,7 +14,8 @@ const actionRow = new MessageActionRow()
         { label: 'Wins', value: 'wins', emoji: emoji.HeroStar },
         { label: 'Kills', value: 'kills', emoji: emoji.ColtGun },
         { label: 'Damage Done', value: 'damage', emoji: emoji.Aim },
-        { label: 'Most Rich', value: 'gems', emoji: emoji.Gem }
+        { label: 'Most Rich', value: 'gems', emoji: emoji.Gem },
+        { label: 'Most Votes', value: 'votes', emoji: emoji.Upvote }
       ])
   ])
 

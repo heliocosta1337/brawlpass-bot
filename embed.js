@@ -262,6 +262,11 @@ module.exports = {
           titleEmoji = emoji.Gem
           score = ParseNumber(p.gems)
           break
+        case 'votes':
+          title = 'Best Voters'
+          titleEmoji = emoji.Upvote
+          score = ParseNumber(p.votes)
+          break
       }
 
       if (rank == 1) rankings += `🥇 ${p.user_name} **|** ${titleEmoji} **${score}**\n`

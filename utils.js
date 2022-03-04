@@ -20,7 +20,7 @@ module.exports = {
     if (percentage >= 80) return 'https://cdn.discordapp.com/attachments/831902713343246336/831903380523450378/80pct.png'
     if (percentage >= 65) return 'https://cdn.discordapp.com/attachments/831902713343246336/831903368451981312/65pct.png'
     if (percentage >= 50) return 'https://cdn.discordapp.com/attachments/831902713343246336/831903357853630475/50pct.png'
-    if (percentage >= 40) return 'https://cdn.discordapp.com/attachments/831902713343246336/831903348792754196/40pct.png'
+    if (percentage >= 33) return 'https://cdn.discordapp.com/attachments/831902713343246336/831903348792754196/40pct.png'
     if (percentage >= 1) return 'https://cdn.discordapp.com/attachments/831902713343246336/831903339746295808/20pct.png'
 
     return 'https://cdn.discordapp.com/attachments/831902713343246336/831903329897676820/0pct.png'
