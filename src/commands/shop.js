@@ -41,6 +41,8 @@ module.exports = class extends Command {
     collector.on('collect', async int => {
       const profile = await profileModel.findOne({ user_id: int.user.id })
 
+      if (!profile) return
+
       switch (int.customId) {
         case 'buy_ticket_1':
           int.reply({ content: await buyTicket(profile, 10, 1), ephemeral: true })
