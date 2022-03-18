@@ -1,8 +1,9 @@
 const Command = require('../structures/Command')
 const moment = require('moment')
+const embed = require('../../embed')
 const emoji = require('../../emoji')
 const { HumanizeMilliseconds } = require('../../utils')
-const { dailyReward } = require('../../config.json')
+const { communityServerId, dailyReward } = require('../../config.json')
 
 module.exports = class extends Command {
   constructor(client) {
@@ -13,6 +14,10 @@ module.exports = class extends Command {
   }
 
   run = (interaction, profile) => {
+    if (interaction.guild.id != communityServerId) {
+      return interaction.reply({ embeds: [embed.Error('Daily rewards can only be claimed in Brawl Pass server.\n\nPlease use `/discord` to join.')], ephemeral: true })
+    }
+
     const cooldown = moment(profile.daily)
 
     if (moment().diff(cooldown, 'minutes') > 1440) {
