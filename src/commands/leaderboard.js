@@ -1,7 +1,7 @@
 const Command = require('../structures/Command')
 const { MessageActionRow, MessageSelectMenu } = require('discord.js')
-const embed = require('../../embed')
-const emoji = require('../../emoji')
+const embed = require('../embed')
+const emoji = require('../emoji')
 
 const actionRow = new MessageActionRow()
   .addComponents([

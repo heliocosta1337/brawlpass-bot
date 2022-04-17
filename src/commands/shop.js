@@ -1,7 +1,7 @@
 const Command = require('../structures/Command')
 const { MessageActionRow, MessageButton } = require('discord.js')
-const embed = require('../../embed')
-const emoji = require('../../emoji')
+const embed = require('../embed')
+const emoji = require('../emoji')
 const profileModel = require('../models/profile')
 
 const buyTicket = (profile, price, amount) => {

@@ -1,6 +1,6 @@
 const Event = require('../structures/Event')
 const profileModel = require('../models/profile')
-const { ParseDiscordName } = require('../../utils')
+const { ParseDiscordName } = require('../utils')
 
 module.exports = class extends Event {
   constructor(client) {

@@ -1,8 +1,8 @@
 const Command = require('../structures/Command')
 const moment = require('moment')
-const embed = require('../../embed')
-const emoji = require('../../emoji')
-const { HumanizeMilliseconds } = require('../../utils')
+const embed = require('../embed')
+const emoji = require('../emoji')
+const { HumanizeMilliseconds } = require('../utils')
 const { communityServerId, dailyReward } = require('../../config.json')
 
 module.exports = class extends Command {

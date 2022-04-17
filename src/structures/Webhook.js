@@ -1,6 +1,6 @@
 const express = require('express')
 const Database = require('../structures/Database')
-const emoji = require('../../emoji')
+const emoji = require('../emoji')
 const profileModel = require('../models/profile')
 const { webhookPort, communityServerId, communityServerVotesChannelId, botId, voteReward } = require('../../config.json')
 

@@ -1,13 +1,13 @@
 const Command = require('../structures/Command')
 const { MessageActionRow, MessageButton } = require('discord.js')
 const moment = require('moment')
-const embed = require('../../embed')
-const emoji = require('../../emoji')
+const embed = require('../embed')
+const emoji = require('../emoji')
 const profileModel = require('../models/profile')
 const brawlerModel = require('../models/brawler')
 const modeModel = require('../models/gamemode')
 const questModel = require('../models/quest')
-const { GetRandomItemFromArray, GetRandomNumber } = require('../../utils')
+const { GetRandomItemFromArray, GetRandomNumber } = require('../utils')
 const { questTypes, questCooldown } = require('../../config.json')
 
 const genQuest = async () => {

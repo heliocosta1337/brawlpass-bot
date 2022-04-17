@@ -1,5 +1,5 @@
 const Command = require('../structures/Command')
-const embed = require('../../embed')
+const embed = require('../embed')
 
 module.exports = class extends Command {
   constructor(client) {

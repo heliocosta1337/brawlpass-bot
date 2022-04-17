@@ -1,6 +1,6 @@
 const Command = require('../structures/Command')
 const { MessageActionRow, MessageSelectMenu } = require('discord.js')
-const embed = require('../../embed')
+const embed = require('../embed')
 const seasonModel = require('../models/season')
 const { currentSeasonName } = require('../../config.json')
 

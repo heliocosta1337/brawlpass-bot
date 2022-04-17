@@ -1,12 +1,12 @@
 const { MessageEmbed } = require('discord.js')
 const moment = require('moment')
 const emoji = require('./emoji')
-const profileModel = require('./src/models/profile')
-const modeModel = require('./src/models/gamemode')
-const brawlerModel = require('./src/models/brawler')
-const seasonModel = require('./src/models/season')
+const profileModel = require('./models/profile')
+const modeModel = require('./models/gamemode')
+const brawlerModel = require('./models/brawler')
+const seasonModel = require('./models/season')
 const { ParseNumber, GetRandomSadEmoji, GetProgressBarImage } = require('./utils')
-const { communityServerInvite, botInvite, currentSeasonName, defaultColor, positiveColor, negativeColor } = require('./config.json')
+const { communityServerInvite, botInvite, currentSeasonName, defaultColor, positiveColor, negativeColor } = require('../config.json')
 
 module.exports = {
   Success: message => {
