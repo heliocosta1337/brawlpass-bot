@@ -7,7 +7,7 @@
   "botInvite": "https://discord.com/api/oauth2/authorize?client_id=709524167917043742&permissions=0&scope=applications.commands%20bot",
   "communityServerInvite": "https://discord.gg/tweenky",
   "questTypes": ["win", "defeat", "deal"],
-  "currentSeasonName": "Biodome",
+  "currentSeasonName": "Stunt Show",
   "defaultColor": "#fedb17",
   "positiveColor": "#2cdc18",
   "negativeColor": "#f01818",
